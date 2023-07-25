@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "mqtt": "^4.3.7",
+    "nanoid": "^3.2.0",
+    "node-dht-sensor": "^0.4.3",
+    "serialport": "^11.0.0"
+  }
+}
