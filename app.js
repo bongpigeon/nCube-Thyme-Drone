@@ -29,51 +29,21 @@ var options = {
     usesecure: conf.usesecure,
 };
 
-
-/* var HTTP_SUBSCRIPTION_ENABLE = 0;
-var MQTT_SUBSCRIPTION_ENABLE = 0;
-var return_count = 0; */
 var request_count = 0;
 
-global.my_control_type = '';
 global.my_gcs_name = '';
 global.my_parent_cnt_name = '';
 global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
-global.my_mission_parent = '';
-global.my_mission_name = '';
 global.my_sortie_name = 'disarm';
-global.my_gimbal_parent = '';
-global.my_gimbal_name = '';
 global.my_command_parent_name = '';
 global.my_command_name = '';
-
-global.my_drone_type = 'pixhawk';
-global.my_secure = 'off';
+global.my_drone_type = 'ardupilot';
 global.my_system_id = 8;
-
-global.gimbal = {};
-
-global.my_rf_host = '';
-global.my_rf_address = '';
-
-global.Req_auth = '';
-global.Res_auth = '';
-global.Result_auth = '';
-global.Certification = '';
+global.drone_info = {};
 
 const retry_interval = 2500;
 const normal_interval = 100;
-
-global.authResult = 'yet';
-
-global.muv_pub_fc_gpi_topic = '';
-global.muv_pub_fc_hb_topic = '';
-global.muv_pub_fc_attitude_topic = '';
-global.muv_pub_fc_bat_state_topic = '';
-global.muv_pub_fc_system_time_topic = '';
-global.muv_pub_fc_timesync_topic = '';
-global.muv_pub_fc_wp_yaw_behavior_topic = '';
 
 global.onem2m_client = new Onem2mClient(options);
 
@@ -159,33 +129,11 @@ function create_sub_all(count, callback) {
     }
 }
 
-global.drone_info = {};
-global.mission_parent = [];
-
 function retrieve_my_cnt_name(callback) {
     onem2m_client.retrieve_cnt('/Mobius/' + conf.ae.approval_gcs + '/approval/' + conf.ae.name + '/la', 0, function (rsc, res_body, count) {
         if (rsc == 2000) {
             drone_info = res_body[Object.keys(res_body)[0]].con;
             console.log(drone_info);
-
-            if (drone_info.hasOwnProperty('update')) {
-                if (drone_info.update === 'enable' || drone_info.update === 'nCube') {
-                    const shell = require('shelljs')
-
-                    if (shell.exec('git reset --hard HEAD && git pull').code !== 0) {
-                        shell.echo('Error: command failed')
-                        shell.exit(1)
-                    } else {
-                        console.log('Finish update !');
-                        drone_info.update = 'disable';
-                        sh_adn.crtci('/Mobius/' + conf.ae.approval_gcs + '/approval/' + conf.ae.name, 0, JSON.stringify(drone_info), null, function () {
-                            if (drone_info.update === 'disable') {
-                                shell.exec('pm2 restart MUV')
-                            }
-                        });
-                    }
-                }
-            }
 
             conf.sub = [];
             conf.cnt = [];
@@ -265,7 +213,8 @@ function retrieve_my_cnt_name(callback) {
             setTimeout(setup_resources, normal_interval,sh_state);
 
             callback();
-        } else {
+        } 
+        else {
             console.log('x-m2m-rsc : ' + rsc + ' <----' + res_body);
             setTimeout(setup_resources, retry_interval, sh_state);
             callback();

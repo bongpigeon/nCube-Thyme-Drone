@@ -63,12 +63,11 @@ ae = {
 };
 
 // build cnt
-var count = 0;
 cnt_arr = [
-    {
-        parent: '/' + cse.name + '/' + ae.name,
-        name: 'disarm',
-    },
+    // {
+    //     parent: '/' + cse.name + '/' + ae.name,
+    //     name: 'disarm',
+    // },
 ]; 
 
 // build sub
