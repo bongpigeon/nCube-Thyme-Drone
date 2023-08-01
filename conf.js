@@ -46,7 +46,7 @@ try {
 catch (e) {
     console.log('can not find flight.json file');
     ae_name.approval_gcs = 'MUV_KETI';
-    ae_name.flight = 'PJB';
+    ae_name.flight = 'Dione';
     fs.writeFileSync('flight.json', JSON.stringify(ae_name, null, 4), 'utf8');
 }
 //console.log(flight);

@@ -78,7 +78,8 @@ var mqtt_init = function() {
             protocolVersion: 4,
             clean: true,
             reconnectPeriod: 2000,
-            connectTimeout: 2000,
+            connectTimeout: 30000,
+            queueQoSZero: false,
             rejectUnauthorized: false
         };
     }
@@ -92,7 +93,8 @@ var mqtt_init = function() {
             protocolVersion: 4,
             clean: true,
             reconnectPeriod: 2000,
-            connectTimeout: 2000,
+            connectTimeout: 30000,
+            queueQoSZero: false,
             key: fs.readFileSync("./server-key.pem"),
             cert: fs.readFileSync("./server-crt.pem"),
             rejectUnauthorized: false
@@ -2120,16 +2122,14 @@ function mqtt_connect(serverip, port, noti_topic) {
             var connectOptions = {
                 host: serverip,
                 port: port,
-//              username: 'keti',
-//              password: 'keti123',
                 protocol: "mqtt",
                 keepalive: 10,
-//              clientId: serverUID,
                 protocolId: "MQTT",
                 protocolVersion: 4,
                 clean: true,
                 reconnectPeriod: 2000,
-                connectTimeout: 2000,
+                connectTimeout: 30000,
+                queueQoSZero: false,
                 rejectUnauthorized: false
             };
         }
@@ -2139,12 +2139,12 @@ function mqtt_connect(serverip, port, noti_topic) {
                 port: port,
                 protocol: "mqtts",
                 keepalive: 10,
-//              clientId: serverUID,
                 protocolId: "MQTT",
                 protocolVersion: 4,
                 clean: true,
                 reconnectPeriod: 2000,
-                connectTimeout: 2000,
+                connectTimeout: 30000,
+                queueQoSZero: false,
                 key: fs.readFileSync("./server-key.pem"),
                 cert: fs.readFileSync("./server-crt.pem"),
                 rejectUnauthorized: false
@@ -2280,6 +2280,52 @@ app.post('/:resourcename0', onem2mParser, function(request, response) {
     });
 });
 
+let getSortieLatest = async (path, cra, callback) => {
+    try {
+        http_request(path + '?fu=1&ty=3&cra=' + cra, 'get', '', '', function (res, res_body) {
+            console.log(path + '?fu=1&ty=3&cra=' + cra + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+            console.log(res_body);
+            callback(res_body.status, res_body.data['m2m:uril']);
+        });
+        // const response = await axios.get(path + '?fu=1&ty=3&cra=' + cra, {
+        //     headers: {
+        //         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+        //         'X-M2M-Origin': 'SVue',
+        //         'Content-Type': 'application/json'
+        //     }
+        // });
+        // console.log('getSortieLatest', response.data['m2m:uril']);
+        // callback(response.status, response.data['m2m:uril']);
+    }
+    catch(err) {
+        console.log("Error >>", err);
+    }
+}
+
+let createSortieContainer = function(parent, rn, time_boot_ms, count, callback) {
+    var results_ct = {};
+
+    //console.log(count + ' - ' + conf.cnt[count].name);
+    var bodyString = '';
+    if (conf.ae.bodytype === 'xml') {
+    }
+    else if(conf.ae.bodytype === 'cbor') {
+    }
+    else {
+        results_ct['m2m:cnt'] = {};
+        results_ct['m2m:cnt'].rn = rn;
+        results_ct['m2m:cnt'].lbl = [time_boot_ms];
+        bodyString = JSON.stringify(results_ct);
+        console.log(bodyString);
+    }
+
+    http_request(parent, 'post', '3', bodyString, function (res, res_body) {
+        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+        console.log(res_body);
+        callback(res.headers['x-m2m-rsc'], res_body, count);
+    });
+};
+
 
 proto.create_ae = crtae;
 proto.retrieve_ae = rtvae;
@@ -2295,5 +2341,8 @@ proto.create_sub = crtsub;
 proto.delete_sub = delsub;
 
 proto.create_cin = crtci;
+
+proto.getSortieLatest = getSortieLatest;
+proto.createSortieContainer = createSortieContainer;
 
 module.exports = Onem2mClient;

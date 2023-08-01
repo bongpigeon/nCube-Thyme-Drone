@@ -142,7 +142,7 @@ function retrieve_my_cnt_name(callback) {
             if (drone_info.hasOwnProperty('gcs')) {
                 my_gcs_name = drone_info.gcs;
             } else {
-                my_gcs_name = 'nCube_MUV';
+                my_gcs_name = 'nCube_Drone';
             }
 
             if (drone_info.hasOwnProperty('host')) {
